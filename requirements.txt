@@ -1,0 +1,17 @@
+transformers == 4.31.0
+pillow == 10.0.0
+auto-gptq == 0.3.1
+bitsandbytes==0.40.2
+scipy == 1.11.2
+langchain == 0.0.277
+nltk == 3.8.1
+pypdf == 3.15.4
+chromadb == 0.4.8
+unstructured == 0.10.10
+sentence_transformers == 2.2.2
+gradio == 3.41.2
+xformers == 0.0.21
+
+
+
+
