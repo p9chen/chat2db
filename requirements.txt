@@ -11,6 +11,7 @@ unstructured == 0.10.10
 sentence_transformers == 2.2.2
 gradio == 3.41.2
 xformers == 0.0.21
+openai == 0.28.1
 
 
 

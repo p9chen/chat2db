@@ -29,7 +29,8 @@ bnb_config = BitsAndBytesConfig(load_in_4bit=True,
 model_id = "/home/will/Documents/models/Llama-2-7b-chat-hf"  # "meta-llama/Llama-2-7b-chat-hf"
 
 tokenizer = AutoTokenizer.from_pretrained(model_id)
-model = AutoModelForCausalLM.from_pretrained(model_id, quantization_config = bnb_config,device_map={"": 0})
+model = AutoModelForCausalLM.from_pretrained(model_id, quantization_config = bnb_config, device_map={"": 0})
+
 
 # %%
 def get_prompt(instruction=INSTRUCTION, new_system_prompt=DEFAULT_SYSTEM_PROMPT,
@@ -51,21 +52,9 @@ def get_prompt(instruction=INSTRUCTION, new_system_prompt=DEFAULT_SYSTEM_PROMPT,
 
 # %% Setup DB retriever
 
-template = get_prompt()
-prompt = PromptTemplate(template=template, input_variables=["context", "question"])
-memory = ConversationBufferWindowMemory(
-    memory_key="chat_history", k=5,
-    return_messages=True
-)
 
-embeddings = HuggingFaceEmbeddings(
-        model_name="sentence-transformers/all-MiniLM-L6-v2",
-        model_kwargs={"device": "cuda"},
-    )
 
-db = Chroma(persist_directory=PERSIST_DIR, embedding_function=embeddings)
 
-retriever = db.as_retriever()
 
 # %% Create pipeline
 
@@ -75,12 +64,43 @@ def create_pipeline(max_new_tokens=512):
         model=model,
         tokenizer=tokenizer,
         max_new_tokens=max_new_tokens,
-        temperature=1)
+        temperature=1
+    )
     return pipe
 
+# %% Setup Chatbot requirements
+
+
+# connect to existing vector DB
+embeddings = HuggingFaceEmbeddings(
+        model_name="sentence-transformers/all-MiniLM-L6-v2",
+        model_kwargs={"device": "cuda"},
+    )
+
+db = Chroma(persist_directory=PERSIST_DIR, embedding_function=embeddings)
+
+# setup retriever
+retriever = db.as_retriever(search_type="mmr",
+                            search_kwargs={'k': 5,
+                                           'fetch_k': 50,
+                                           'lambda_mult': 0.5
+                                           }
+                            )
+
+# setup prompt
+template = get_prompt()
+prompt = PromptTemplate(template=template, input_variables=["context", "question"])
+
+# setup chat memory
+memory = ConversationBufferWindowMemory(
+    memory_key="chat_history", k=5,
+    return_messages=True
+)
+
 # %% Create Chat bot
+
 class ChatBot:
-    def __init__(self, memory, prompt, task:str = "text-generation", retriever = retriever):
+    def __init__(self, memory, prompt, task: str="text-generation", retriever=retriever):
         self.memory = memory
         self.prompt = prompt
         self.retriever = retriever
@@ -109,8 +129,6 @@ def clear_llm_memory():
     bot.memory.clear()
 
 def update_prompt(sys_prompt):
-    if sys_prompt == "":
-        sys_prompt = system_prompt
     template = get_prompt(instruction, sys_prompt)
 
     prompt = PromptTemplate(template=template, input_variables=["context", "question"])
@@ -122,7 +140,7 @@ def update_prompt(sys_prompt):
 
 with gr.Blocks() as demo:
     update_sys_prompt = gr.Textbox(label = "Update System Prompt")
-    chatbot = gr.Chatbot(label="Chess Bot", height = 300)
+    chatbot = gr.Chatbot(label="Chat2DB Bot", height = 300)
     msg = gr.Textbox(label="Question")
     clear = gr.ClearButton([msg, chatbot])
     clear_memory = gr.Button(value = "Clear LLM Memory")

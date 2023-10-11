@@ -26,3 +26,9 @@ TestResults.xml
 
 # data files
 data/
+
+# virtual env
+venv/
+
+# vector_db
+/vector_db/
