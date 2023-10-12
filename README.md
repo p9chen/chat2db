@@ -1,8 +1,5 @@
 # chat2db 
 
-
-
-
 A chatbot can respond question based on a postgresql vector db using Llama 2 + Langchain + VectorDB (pgvector or chroma)
 
 ## 1. Setup Chatbot with Chroma as vector DB 

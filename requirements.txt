@@ -1,16 +1,16 @@
-transformers
+transformers == 4.31.0
 pillow == 10.0.0
 auto-gptq == 0.3.1
-bitsandbytes
+bitsandbytes == 0.40.2
 scipy == 1.11.2
 langchain == 0.0.313
 nltk == 3.8.1
 pypdf == 3.15.4
-chromadb
+chromadb == 0.4.8
 unstructured == 0.10.10
 sentence_transformers == 2.2.2
 gradio == 3.41.2
-xformers
+xformers == 0.0.21
 openai == 0.28.1
 psycopg2 == 2.9.9
 
