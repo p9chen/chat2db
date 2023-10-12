@@ -3,15 +3,15 @@
 
 
 
-A chatbot can respond question based on a postgresql vector db using Llama 2 7B + Langchain + VectorDB (pgvector or chroma)
+A chatbot can respond question based on a postgresql vector db using Llama 2 + Langchain + VectorDB (pgvector or chroma)
 
-## Setup Chatbot with Chroma as vector DB 
+## 1. Setup Chatbot with Chroma as vector DB 
 
 run `ingest/chroma/ingest_chroma.py` to ingest all .pdf, .md, .txt files into the chroma vector DB.
 
 run `app/chat_chroma.py` to start the chatbot, then just go to the link in the terminal/console to chat with the bot.
 
-## Setup Chatbot with pgvector as vector DB (docker) 
+## 2. Setup Chatbot with pgvector as vector DB (docker) 
 
 cd into `ingest/chroma` folder, run docker-compose file to setup postgres DB with pgvector extension (This will also run the script in `init.sql`)
 ```shell
@@ -22,11 +22,11 @@ run `ingest/pgvector/ingest_chroma.py` to ingest all .pdf, .md, .txt files into 
 run `app/chat_pgvector.py` to start the chatbot, then just go to the link in the terminal/console to chat with the bot.
 
 
-## Setup PostgreSQL Locally (optional)
+## 3. Setup PostgreSQL Locally (optional)
 
 **Note**: You don't need to do this if you just setup pgvector with docker like the previous section
 
-### Install PostgreSQL 15.2 +
+### 3.1 Install PostgreSQL 15.2 +
 **SKIP** *if you already have postgresql 15.2 and above (15.2 + is required for pgvector extension)*
 
 PostgreSQL 15 package is not available in the default package repository, so enable its official package repository using following commands.
@@ -66,7 +66,7 @@ psql --version
 ```
 reference: https://www.linuxtechi.com/how-to-install-postgresql-on-ubuntu/#google_vignette
 
-### Create New Database
+### 3.2 Create New Database
 
 Access the PostgreSQL database shell as the default superuser 'postgres'
 ```shell
@@ -102,7 +102,7 @@ postgres=# \l
 
 Reference: https://stackoverflow.com/questions/53267642/create-new-local-server-in-pgadmin
 
-### Install pgvector
+### 3.3 Install pgvector
 PostgreSQL's extensions often require the PostgreSQL development package which contains the necessary header files (like postgres.h). You can install it with:
 ```shell
 sudo apt install postgresql-server-dev-15
@@ -146,7 +146,7 @@ Run this for each database you are using for storing vectors
 postgres=# CREATE EXTENSION vector;
 ```
 
-### (OPTIONAL) Install pgAdmin
+### 3.4 (OPTIONAL) Install pgAdmin
 **SKIP** *if you already have a postgresql client with virtual UI*
 
 Install the public key for the repository (if not done previously):
