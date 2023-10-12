@@ -1,24 +1,24 @@
 """
-Similarity and RAG exploration
+Similarity and RAG exploration for the following vector DB
+ - Chroma
+ - Pgvector
+
+Note: You need to run ingest for Chroma or Pgvector for this demo to work
 
 Reference: https://blog.gopenai.com/rag-for-everyone-a-beginners-guide-to-embedding-similarity-search-and-vector-db-423946475c90
 
 """
 
-from langchain.embeddings import HuggingFaceEmbeddings
-
-from langchain.embeddings import OpenAIEmbeddings
-from langchain.vectorstores import Chroma
-
+import os
+from dotenv import load_dotenv
 import pandas as pd
 import numpy as np
 from numpy.linalg import norm
 
-import time
-import transformers
-import torch
-from transformers import AutoTokenizer, AutoModelForCausalLM, BitsAndBytesConfig, pipeline
+from langchain.vectorstores import Chroma
 
+from langchain.embeddings import HuggingFaceEmbeddings
+from langchain.vectorstores.pgvector import PGVector, DistanceStrategy
 
 # %% Embedding Similarity
 
@@ -64,7 +64,7 @@ for index, row in df_context.iterrows():
 df_context["cos_sim"] = cos_sim
 
 
-# %% LangChain RAG
+# %% RAG - Chroma
 
 # connect to vector store
 PERSIST_DIR = "vector_db/db_chroma"
@@ -85,4 +85,43 @@ docs = vectorstore.max_marginal_relevance_search(question, k=3)
 print(docs)
 
 
+# %% RAG - Pgvector
+
+# load env variable
+if load_dotenv("ingest/pgvector/.env"):
+    print("Successfully loaded .env")
+else:
+    print("Failed to load .env")
+
+# setup config
+DATA_DIR = "data"  # dir or file
+COLLECTION_NAME = 'langchain_pgvector'
+
+embeddings = HuggingFaceEmbeddings(
+    model_name="sentence-transformers/all-MiniLM-L6-v2",
+    model_kwargs={"device": "cuda"},
+)
+
+connection_string = PGVector.connection_string_from_db_params(
+    driver=os.environ.get("DB_DRIVER"),
+    host=os.getenv('DB_HOST'),
+    port=os.getenv('DB_PORT'),
+    database=os.getenv('DB_DATABASE'),
+    user=os.getenv('DB_USER'),
+    password=os.getenv('DB_PASSWORD')
+)
+
+# connect to pgvector db
+store = PGVector(
+    connection_string=connection_string,
+    embedding_function=embeddings,
+    collection_name=COLLECTION_NAME,
+    distance_strategy=DistanceStrategy.COSINE
+)
+
+# retrieve context
+retriever = store.as_retriever(search_kwargs={"k": 2})
+
+docs = retriever.get_relevant_documents(query='What is GPTQ')
+print(docs)
 

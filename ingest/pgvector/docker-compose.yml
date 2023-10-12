@@ -1,0 +1,16 @@
+version: '3.8'
+
+services:
+  db:
+    hostname: db
+    image: ankane/pgvector
+    ports:
+     - 5433:5432
+    restart: always
+    environment:
+      - POSTGRES_DB=langchain
+      - POSTGRES_USER=pguser
+      - POSTGRES_PASSWORD=password
+      - POSTGRES_HOST_AUTH_METHOD=trust
+    volumes:
+     - ./init.sql:/docker-entrypoint-initdb.d/init.sql

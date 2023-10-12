@@ -1,13 +1,14 @@
+import os
+from dotenv import load_dotenv
 import torch
-# pip install git+https://github.com/huggingface/transformers@cae78c46d
 from transformers import AutoModelForCausalLM, AutoTokenizer, BitsAndBytesConfig, pipeline
 
-from langchain import HuggingFacePipeline
-from langchain import PromptTemplate, LLMChain
+from langchain.llms import HuggingFacePipeline
+from langchain.prompts import PromptTemplate
 from langchain.chains import ConversationalRetrievalChain
-from langchain.memory import ConversationBufferMemory, ConversationBufferWindowMemory
+from langchain.memory import ConversationBufferWindowMemory
 from langchain.embeddings import HuggingFaceEmbeddings
-from langchain.vectorstores import Chroma
+from langchain.vectorstores.pgvector import PGVector, DistanceStrategy
 
 import gradio as gr
 
@@ -65,13 +66,35 @@ def create_pipeline(max_new_tokens=512):
 
 # %% Setup Chatbot requirements
 
-# connect to existing vector DB
-embeddings = HuggingFaceEmbeddings(
-        model_name="sentence-transformers/all-MiniLM-L6-v2",
-        model_kwargs={"device": "cuda"},
-    )
+# load env variable
+if load_dotenv("ingest/pgvector/.env"):
+    print("Successfully loaded .env")
+else:
+    print("Failed to load .env")
 
-db = Chroma(persist_directory=PERSIST_DIR, embedding_function=embeddings)
+# setup config
+COLLECTION_NAME = 'langchain_pgvector'
+
+embeddings = HuggingFaceEmbeddings(
+    model_name="sentence-transformers/all-MiniLM-L6-v2",
+    model_kwargs={"device": "cuda"},
+)
+
+connection_string = PGVector.connection_string_from_db_params(
+    driver=os.environ.get("DB_DRIVER"),
+    host=os.getenv('DB_HOST'),
+    port=os.getenv('DB_PORT'),
+    database=os.getenv('DB_DATABASE'),
+    user=os.getenv('DB_USER'),
+    password=os.getenv('DB_PASSWORD')
+)
+
+db = PGVector(
+    connection_string=connection_string,
+    embedding_function=embeddings,
+    collection_name=COLLECTION_NAME,
+    distance_strategy=DistanceStrategy.COSINE
+)
 
 # setup retriever
 retriever = db.as_retriever(search_type="mmr",

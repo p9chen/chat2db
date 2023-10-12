@@ -14,12 +14,12 @@ HUGGINGFACEHUB_API_TOKEN = os.getenv("HUGGINGFACEHUB_API_TOKEN")
 # path for persist vector DB
 DB_CHROMA_PATH = "vector_db/db_chroma"
 # path for input data
-DATA_DIR = "data"  # "data/state_of_the_union.txt"
+DATA_DIR = "data"  # dir or file
 
 
 
 # Create vector database
-def create_vector_database(data_path, db_path, chunk_size=1000, chunk_overlap=100, length_function=len):
+def create_vector_db_chroma(data_path, db_path, chunk_size=1000, chunk_overlap=100, length_function=len):
     """
     Creates a vector database using document loaders and embeddings.
 
@@ -79,4 +79,4 @@ def create_vector_database(data_path, db_path, chunk_size=1000, chunk_overlap=10
 
 
 if __name__ == "__main__":
-    create_vector_database(DATA_DIR, DB_CHROMA_PATH)
+    create_vector_db_chroma(DATA_DIR, DB_CHROMA_PATH)
