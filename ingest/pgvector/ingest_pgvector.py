@@ -5,7 +5,7 @@ from langchain.document_loaders import DirectoryLoader, PyPDFLoader, TextLoader,
 from langchain.text_splitter import RecursiveCharacterTextSplitter
 from langchain.embeddings import HuggingFaceEmbeddings
 from langchain.vectorstores.pgvector import PGVector, DistanceStrategy
-from langchain.docstore.document import Document
+
 
 
 # %%

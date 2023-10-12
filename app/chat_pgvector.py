@@ -21,8 +21,6 @@ You are a helpful, respectful and honest assistant. Always answer as helpfully a
 
 If a question does not make any sense, or is not factually coherent, explain why instead of answering something not correct. If you don't know the answer to a question, please don't share false information. """
 
-PERSIST_DIR = "vector_db/db_chroma"
-
 bnb_config = BitsAndBytesConfig(load_in_4bit=True,
     bnb_4bit_quant_type="nf4",
     bnb_4bit_compute_dtype=torch.bfloat16,
